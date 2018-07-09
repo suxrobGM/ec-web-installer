@@ -7,7 +7,10 @@
         mc:Ignorable="d"
         Title="Hearts of Iron IV: Economic Crisis Online Installer" 
         Height="430" 
-        Width="700" BorderBrush="Black">
+        Width="700" 
+        BorderBrush="Black" 
+        ResizeMode="CanMinimize" 
+        WindowStyle="SingleBorderWindow">
     <Grid>
         <Grid.Background>
             <ImageBrush ImageSource="Background.bmp"/>
