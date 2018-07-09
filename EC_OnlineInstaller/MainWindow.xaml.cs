@@ -147,7 +147,7 @@ namespace EC_OnlineInstaller
                     }                    
                 }
 
-                //Копировать файл .mod из папке мода в папку My Documents\Paradox Interactive\Hearts of Iron Iv\mod\
+                //Копировать файл .mod из папке мода в папку My Documents\Paradox Interactive\Hearts of Iron IV\mod\
                 File.Copy(modPath + @"\launcher\Economic_Crisis.mod", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Paradox Interactive", "Hearts of Iron IV", "mod") + @"\Economic_Crisis.mod", true);
 
             }, cancellationToken);
