@@ -1,0 +1,19 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:EC_OnlineInstaller"
+                    xmlns:v="clr-namespace:System;assembly=mscorlib">
+    
+    <v:String x:Key="m_SetModDirDesc">Please set the correct path of mod folder</v:String>
+    <v:String x:Key="m_ModInstallationPath">Installation path of the mod:</v:String>
+    <v:String x:Key="m_Install_Btn">Install</v:String>
+    <v:String x:Key="m_Cancel_Btn">Cancel</v:String>
+    <v:String x:Key="m_Language_CB">Application language:</v:String>
+    <v:String x:Key="m_ERROR">ERROR</v:String>
+    <v:String x:Key="m_NetworkErrorText">Network connection error, please check the network connection</v:String>
+    <v:String x:Key="m_StartingDownload">Starting download...</v:String>
+    <v:String x:Key="m_DownloadingVersion">Downloading mod version:</v:String>
+    <v:String x:Key="m_DownloadingFile">Downloading file:</v:String>
+    <v:String x:Key="m_DownloadCanceled">Downloading canceled.</v:String>
+    <v:String x:Key="m_ToolTip">The installer automatically determines the installation path. ATTENTION! The installation path must be in %My Documents%\Paradox Interactive\Hearts of Iron IV\mod\Economic_Crisis</v:String>
+    
+</ResourceDictionary>

@@ -1,0 +1,19 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:EC_OnlineInstaller"
+                    xmlns:v="clr-namespace:System;assembly=mscorlib">
+    
+    <v:String x:Key="m_SetModDirDesc">Укажите правильный путь к папке мода</v:String>
+    <v:String x:Key="m_ModInstallationPath">Путь установки мода:</v:String>
+    <v:String x:Key="m_Install_Btn">Установить</v:String>
+    <v:String x:Key="m_Cancel_Btn">Отмена</v:String>
+    <v:String x:Key="m_Language_CB">Язык приложения:</v:String>
+    <v:String x:Key="m_ERROR">ОШИБКА</v:String>
+    <v:String x:Key="m_NetworkErrorText">Ошибка сетевого подключения, проверьте подключение к сети</v:String>
+    <v:String x:Key="m_StartingDownload">Начало загрузки...</v:String>
+    <v:String x:Key="m_DownloadingVersion">Загрузка версии мода:</v:String>
+    <v:String x:Key="m_DownloadingFile">Скачивается файл:</v:String>
+    <v:String x:Key="m_DownloadCanceled">Загрузка отменена.</v:String>
+    <v:String x:Key="m_ToolTip">Установщик автоматически определяет путь установки. ВНИМАНИЕ! Путь установки должна быть в %Мои документы%\Paradox Interactive\Hearts of Iron IV\mod\Economic_Crisis"</v:String>
+    
+</ResourceDictionary>
