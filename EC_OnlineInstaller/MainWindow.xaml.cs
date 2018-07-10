@@ -8,6 +8,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Threading;
+using IWshRuntimeLibrary;
 
 namespace EC_OnlineInstaller
 {
@@ -70,7 +71,13 @@ namespace EC_OnlineInstaller
                 var progress = new Progress<ProgressData>(progressData =>
                 {
                     progressBar.Dispatcher.Invoke(() => progressBar.Value = progressData.progressPercent);
-                    progressBarStatusText.Dispatcher.Invoke(() => progressBarStatusText.Text = $"{this.FindResource("m_DownloadingVersion")} {this.remoteModVersion} \t\t{this.FindResource("m_DownloadingFile")} {progressData.statusText} \t\t{progressData.downloadedFiles}/{progressData.maxDownloadingFiles}");
+                    progressBarStatusText.Dispatcher.Invoke(() =>
+                    {
+                        if(progressBar.Value != progressBar.Maximum)
+                        {
+                            progressBarStatusText.Text = $"{this.FindResource("m_DownloadingVersion")} {this.remoteModVersion} \t\t{this.FindResource("m_DownloadingFile")} {progressData.statusText} \t\t{progressData.downloadedFiles}/{progressData.maxDownloadingFiles}";
+                        }                      
+                    });
                 });
                 await DownloadAsync(cts.Token, progress);
             }
@@ -148,7 +155,10 @@ namespace EC_OnlineInstaller
                 }
 
                 //Копировать файл .mod из папке мода в папку My Documents\Paradox Interactive\Hearts of Iron IV\mod\
-                File.Copy(modPath + @"\launcher\Economic_Crisis.mod", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Paradox Interactive", "Hearts of Iron IV", "mod") + @"\Economic_Crisis.mod", true);
+                System.IO.File.Copy(modPath + @"\launcher\Economic_Crisis.mod", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Paradox Interactive", "Hearts of Iron IV", "mod") + @"\Economic_Crisis.mod", true);
+
+                //Создать ярлык на рабочем столе
+                CreateShortcut();
 
             }, cancellationToken);
         }
@@ -166,13 +176,34 @@ namespace EC_OnlineInstaller
                     Directory.CreateDirectory(modPath + Path.GetDirectoryName(fileNameWindows));
                 }
 
-                File.WriteAllBytes(modPath + fileNameWindows, data);
+                System.IO.File.WriteAllBytes(modPath + fileNameWindows, data);
             }
         }
 
         private int GetPercentage(int current, int max)
         {
             return (current * 100) / max;
-        }      
+        }
+
+        private void CreateShortcut()
+        {
+            object shDesktop = "Desktop";
+            WshShell shell = new WshShell();
+            string shortcutAddress = (string)shell.SpecialFolders.Item(ref shDesktop) + @"\Hearts of Iron IV Economic Crisis.lnk";
+            IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutAddress);
+            shortcut.Description = "Open the mod";
+            shortcut.IconLocation = modPath + @"\launcher\Icon_EC.ico";
+            shortcut.Hotkey = "Ctrl+Shift+N";
+            shortcut.TargetPath = modPath + @"\launcher\EC_Launcher.exe";
+            shortcut.Save();
+        }
+
+        private void progressBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if(progressBar.Value==progressBar.Maximum)
+            {
+                progressBarStatusText.Text = "Finished downloading!";               
+            }
+        }
     }
 }
