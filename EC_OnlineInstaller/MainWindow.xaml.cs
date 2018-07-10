@@ -3,11 +3,11 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
-using Dropbox.Api;
 using System.Linq;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Threading;
+using Dropbox.Api;
 using IWshRuntimeLibrary;
 
 namespace EC_OnlineInstaller
@@ -19,10 +19,10 @@ namespace EC_OnlineInstaller
     {
         private string modPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Paradox Interactive", "Hearts of Iron IV", "mod", "Economic_Crisis");
         private string tokenDropbox = "JCFYioFBHBAAAAAAAAAAFq4g6p6ZhtsYZJktjnNb_JFknLnJjKEMyASiPO7kKKK5";
-        private string rootFolder = "/EC_Server_Files";
+        private string rootFolder = "/EC_Server_Files";      
         private DropboxClient dbx;       
         private Version remoteModVersion;
-        private CancellationTokenSource cts;    
+        private CancellationTokenSource cts;     
 
         struct ProgressData
         {
@@ -46,7 +46,7 @@ namespace EC_OnlineInstaller
         }    
 
         private void PathSelect_Btn_Click(object sender, RoutedEventArgs e)
-        {
+        {           
             using (var dialog = new FolderBrowserDialog())
             {
                 dialog.Description = this.FindResource("m_SetModDirDesc").ToString();                               
@@ -58,15 +58,17 @@ namespace EC_OnlineInstaller
         }
 
         private async void Install_Btn_Click(object sender, RoutedEventArgs e)
-        {
-            progressBarStatusText.Text = this.FindResource("m_StartingDownload").ToString(); 
-            if(cts.IsCancellationRequested)
+        {                    
+            if (cts.IsCancellationRequested)
             {
                 cts = new CancellationTokenSource();
             }
-
             try
-            {
+            {               
+                Install_Btn.IsEnabled = false;
+                PathSelect_Btn.IsEnabled = false;
+                progressBarStatusText.Text = this.FindResource("m_StartingDownload").ToString();
+
                 this.remoteModVersion = await GetRemoteModVersionAsync(cts.Token);
                 var progress = new Progress<ProgressData>(progressData =>
                 {
@@ -97,6 +99,8 @@ namespace EC_OnlineInstaller
             if(cts != null)
             {
                 cts.Cancel();
+                Install_Btn.IsEnabled = true;
+                PathSelect_Btn.IsEnabled = true;
             }
         }
 

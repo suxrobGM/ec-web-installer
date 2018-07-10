@@ -17,7 +17,7 @@
         </Grid.Background>
         <Label Content="Developed by SuxrobGM" HorizontalAlignment="Left" Margin="21,359,0,0" VerticalAlignment="Top" FontStyle="Italic" Foreground="White"/>
         <ProgressBar x:Name="progressBar" HorizontalAlignment="Left" Height="23" Margin="21,293,0,0" VerticalAlignment="Top" Width="645" BorderBrush="Red" ValueChanged="progressBar_ValueChanged"/>
-        <TextBlock Text="{Binding ElementName=progressBar, Path=Value, StringFormat={}{0:0}%}" Margin="334,293,0,0" TextWrapping="Wrap" Height="23" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <TextBlock Text="{Binding ElementName=progressBar, Path=Value, StringFormat={}{0:0}%}" Margin="334,293,0,0" TextWrapping="Wrap" Height="23" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold"/>
         <TextBlock x:Name="progressBarStatusText" Text="" HorizontalAlignment="Left" Margin="21,272,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" FontStyle="Italic"/>
         <TextBlock x:Name="pathSelect_TB" HorizontalAlignment="Left" Margin="21,125,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Background="#FFD6D6D6" Height="23" Width="603" FontWeight="Bold">
             <TextBlock.Effect>
