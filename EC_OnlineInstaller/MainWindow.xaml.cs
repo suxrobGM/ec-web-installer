@@ -144,6 +144,11 @@ namespace EC_OnlineInstaller
                 foreach (var file in filesList)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
+                    //Не скачать файлы гита и файлы конфига
+                    if (file.Contains(".git") || file.Contains("Settings.xml"))
+                    {
+                        continue;
+                    }                   
 
                     await DownloadFromDbx(rootFolder, file);
 
