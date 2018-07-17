@@ -138,8 +138,8 @@ namespace EC_OnlineInstaller
                 List<string> filesList = new List<string>();
 
                 var response = await dbx.Files.ListFolderAsync(rootFolder, true);
-                progressData.maxDownloadingFiles = (from item in response.Entries where item.IsFile select item).Count();
-                filesList = (from item in response.Entries where item.IsFile select item.PathDisplay.Remove(0, rootFolder.ToLower().Length)).ToList();
+                progressData.maxDownloadingFiles = (from item in response.Entries where item.IsFile select item).Count(); //Подсчет файлов для загрузки
+                filesList = (from item in response.Entries where item.IsFile select item.PathDisplay.Remove(0, rootFolder.ToLower().Length)).ToList(); //список файлов для загрузки
 
                 foreach (var file in filesList)
                 {
