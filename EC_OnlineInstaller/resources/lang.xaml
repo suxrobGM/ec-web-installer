@@ -7,10 +7,11 @@
     <v:String x:Key="m_ModInstallationPath">Installation path of the mod:</v:String>
     <v:String x:Key="m_Install_Btn">Install</v:String>
     <v:String x:Key="m_Cancel_Btn">Cancel</v:String>
+    <v:String x:Key="m_Exit_Btn">Exit</v:String>
     <v:String x:Key="m_Language_CB">Application language:</v:String>
     <v:String x:Key="m_ERROR">ERROR</v:String>
     <v:String x:Key="m_NetworkErrorText">Network connection error, please check the network connection</v:String>
-    <v:String x:Key="m_StartingDownload">Starting download...</v:String>
+    <v:String x:Key="m_StartingDownload">Downloading metadata...</v:String>
     <v:String x:Key="m_DownloadingVersion">Downloading mod version:</v:String>
     <v:String x:Key="m_DownloadingFile">Downloading file:</v:String>
     <v:String x:Key="m_DownloadCanceled">Downloading canceled.</v:String>

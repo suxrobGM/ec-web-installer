@@ -104,6 +104,15 @@ namespace EC_OnlineInstaller
             }
         }
 
+        private void Exit_Btn_Click(object sender, RoutedEventArgs e)
+        {
+            if (cts != null)
+            {
+                cts.Cancel();             
+            }
+            Environment.Exit(0);
+        }
+
         private void ComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if(language_CB.SelectedIndex == 0)
@@ -130,33 +139,49 @@ namespace EC_OnlineInstaller
             }, cancellationToken);
             return remoteModVersion;
         }
+
         private async Task DownloadAsync(CancellationToken cancellationToken, IProgress<ProgressData> progress)
         {
             await Task.Run(async () =>
             {               
                 ProgressData progressData = new ProgressData();
-                List<string> filesList = new List<string>();
-
+                List<string> downloadList = new List<string>(); //список файлов для загрузки
+                
                 var response = await dbx.Files.ListFolderAsync(rootFolder, true);
-                progressData.maxDownloadingFiles = (from item in response.Entries where item.IsFile select item).Count(); //Подсчет файлов для загрузки
-                filesList = (from item in response.Entries where item.IsFile select item.PathDisplay.Remove(0, rootFolder.ToLower().Length)).ToList(); //список файлов для загрузки
-
-                foreach (var file in filesList)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    
-                    //Не скачать файлы гита и файлы конфига
-                    if (file.Contains(".git") || file.Contains("Settings.xml"))
+                
+                while(true)
+                {                   
+                    foreach (var metadata in response.Entries)
                     {
-                        continue;
-                    }                   
+                        if (metadata.IsFile && //Не скачать файлы гита и файлы конфига
+                            !metadata.PathDisplay.Contains(".git") && 
+                            !metadata.Name.Contains(".git") &&
+                            !metadata.Name.Contains("Settings.xml"))
+                        {
+                            downloadList.Add(metadata.PathDisplay.Remove(0, rootFolder.Length));
+                        }                           
+                    }
+
+                    if(!response.HasMore)
+                    {
+                        break;
+                    }
+
+                    response = await dbx.Files.ListFolderContinueAsync(response.Cursor);                   
+                }
+                
+                progressData.maxDownloadingFiles = downloadList.Count(); //подсчитать файлов для загрузки              
+                
+
+                foreach (var file in downloadList)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();                                                        
 
                     await DownloadFromDbx(rootFolder, file);
-
-                    string fileName = Path.GetFileName(file);
+                       
                     progressData.downloadedFiles++;                     
                     progressData.progressPercent = GetPercentage(progressData.downloadedFiles, progressData.maxDownloadingFiles);
-                    progressData.statusText = fileName;
+                    progressData.statusText = Path.GetFileName(file);
 
                     if (progress != null)
                     {
@@ -164,7 +189,7 @@ namespace EC_OnlineInstaller
                     }                    
                 }
 
-                //Копировать файл .mod из папке мода в папку My Documents\Paradox Interactive\Hearts of Iron IV\mod\
+                //Копировать файл .mod из папке мода на папку My Documents\Paradox Interactive\Hearts of Iron IV\mod\
                 System.IO.File.Copy(modPath + @"\launcher\Economic_Crisis.mod", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Paradox Interactive", "Hearts of Iron IV", "mod") + @"\Economic_Crisis.mod", true);
 
                 //Создать ярлык на рабочем столе
@@ -195,6 +220,7 @@ namespace EC_OnlineInstaller
             return (current * 100) / max;
         }
 
+        // Создать ярлык лаунчера после завершение установки
         private void CreateShortcut()
         {
             object shDesktop = "Desktop";

@@ -7,10 +7,11 @@
     <v:String x:Key="m_ModInstallationPath">Путь установки мода:</v:String>
     <v:String x:Key="m_Install_Btn">Установить</v:String>
     <v:String x:Key="m_Cancel_Btn">Отмена</v:String>
+    <v:String x:Key="m_Exit_Btn">Выход</v:String>
     <v:String x:Key="m_Language_CB">Язык приложения:</v:String>
     <v:String x:Key="m_ERROR">ОШИБКА</v:String>
     <v:String x:Key="m_NetworkErrorText">Ошибка сетевого подключения, проверьте подключение к сети</v:String>
-    <v:String x:Key="m_StartingDownload">Начало загрузки...</v:String>
+    <v:String x:Key="m_StartingDownload">Загрузка метаданные...</v:String>
     <v:String x:Key="m_DownloadingVersion">Загрузка версии мода:</v:String>
     <v:String x:Key="m_DownloadingFile">Скачивается файл:</v:String>
     <v:String x:Key="m_DownloadCanceled">Загрузка отменена.</v:String>
