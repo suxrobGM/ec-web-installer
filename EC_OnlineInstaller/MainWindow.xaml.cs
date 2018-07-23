@@ -77,8 +77,16 @@ namespace EC_OnlineInstaller
                     {
                         if(progressBar.Value != progressBar.Maximum)
                         {
-                            progressBarStatusText.Text = $"{this.FindResource("m_DownloadingVersion")} {this.remoteModVersion} \t\t{this.FindResource("m_DownloadingFile")} {progressData.statusText} \t\t{progressData.downloadedFiles}/{progressData.maxDownloadingFiles}";
+                            progressBarStatusText.Text = $"{this.FindResource("m_DownloadingVersion")} {this.remoteModVersion} \t\t{this.FindResource("m_DownloadingFile")} {progressData.statusText}";
                         }                      
+                    });
+
+                    downloadingCountText.Dispatcher.Invoke(() =>
+                    {
+                        if (progressBar.Value != progressBar.Maximum)
+                        {
+                            downloadingCountText.Text = $"{progressData.downloadedFiles}/{progressData.maxDownloadingFiles}";
+                        }
                     });
                 });
                 await DownloadAsync(cts.Token, progress);
