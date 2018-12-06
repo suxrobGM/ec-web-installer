@@ -13,7 +13,7 @@
         WindowStyle="SingleBorderWindow">
     <Grid>
         <Grid.Background>
-            <ImageBrush ImageSource="Background.bmp"/>
+            <ImageBrush ImageSource="/EC_OnlineInstaller;component/resources/background.bmp"/>
         </Grid.Background>
         <Label Content="Developed by SuxrobGM" HorizontalAlignment="Left" Margin="21,359,0,0" VerticalAlignment="Top" FontStyle="Italic" Foreground="White"/>
         <ProgressBar x:Name="progressBar" HorizontalAlignment="Left" Height="23" Margin="21,293,0,0" VerticalAlignment="Top" Width="645" BorderBrush="Red" ValueChanged="progressBar_ValueChanged"/>
