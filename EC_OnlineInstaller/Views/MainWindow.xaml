@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EC_OnlineInstaller"
+        xmlns:prism="http://prismlibrary.com/"
+        xmlns:local="clr-namespace:EC_OnlineInstaller.ViewModels"       
         mc:Ignorable="d"
         Title="Hearts of Iron IV: Economic Crisis Online Installer" 
         Height="430" 
@@ -11,21 +12,31 @@
         BorderBrush="Black" 
         ResizeMode="CanMinimize" 
         WindowStyle="SingleBorderWindow">
+
+    <Window.DataContext>
+        <local:MainWindowViewModel/>
+    </Window.DataContext>
+
     <Grid>
         <Grid.Background>
-            <ImageBrush ImageSource="/EC_OnlineInstaller;component/resources/background.bmp"/>
+            <ImageBrush ImageSource="/EC_OnlineInstaller;component/Resources/background.bmp"/>
         </Grid.Background>
-        <Label Content="Developed by SuxrobGM" HorizontalAlignment="Left" Margin="21,359,0,0" VerticalAlignment="Top" FontStyle="Italic" Foreground="White"/>
-        <ProgressBar x:Name="progressBar" HorizontalAlignment="Left" Height="23" Margin="21,293,0,0" VerticalAlignment="Top" Width="645" BorderBrush="Red" ValueChanged="progressBar_ValueChanged"/>
-        <TextBlock Text="{Binding ElementName=progressBar, Path=Value, StringFormat={}{0:0}%}" Margin="334,293,0,0" TextWrapping="Wrap" Height="23" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold"/>
-        <TextBlock x:Name="progressBarStatusText" Text="" HorizontalAlignment="Left" Margin="21,272,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" FontStyle="Italic"/>
-        <TextBlock x:Name="downloadingCountText" HorizontalAlignment="Left" Margin="597,272,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White"/>
-        <TextBlock x:Name="pathSelect_TB" HorizontalAlignment="Left" Margin="21,125,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Background="#FFD6D6D6" Height="23" Width="603" FontWeight="Bold">
+        <Label HorizontalAlignment="Left" Margin="21,359,0,0" VerticalAlignment="Top" Foreground="White" FontStyle="Italic" FontWeight="Bold">
+            <Hyperlink NavigateUri="https://www.facebook.com/suxrobgm" RequestNavigate="Hyperlink_RequestNavigate">
+                Developed by SuxrobGM
+            </Hyperlink>
+        </Label>
+        <ProgressBar Value="{Binding ProgressData.ProgressPercent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="21,293,0,0" VerticalAlignment="Top" Width="645" BorderBrush="Red"/>
+        <TextBlock Text="{Binding ProgressData.ProgressPercent, StringFormat={}{0:0}%}" Margin="334,293,0,0" TextWrapping="Wrap" Height="23" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold"/>
+        <TextBlock Text="{Binding ProgressData.StatusText}" HorizontalAlignment="Left" Margin="21,272,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" FontStyle="Italic"/>
+        <TextBlock Text="{Binding ProgressData.DownloadedFiles}" HorizontalAlignment="Left" Margin="586,272,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" Width="33"/>
+        <TextBlock Text="{Binding ProgressData.MaxDownloadingFiles, StringFormat={}/{0:0}}" HorizontalAlignment="Left" Margin="620,272,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White"/>
+        <TextBlock Text="{Binding InstallationPath}" HorizontalAlignment="Left" Margin="21,125,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Background="#FFD6D6D6" Height="23" Width="603" FontWeight="Bold">
             <TextBlock.Effect>
                 <DropShadowEffect Color="#FF248031" BlurRadius="10"/>
             </TextBlock.Effect>
         </TextBlock>
-        <Button x:Name="PathSelect_Btn" Content="..." HorizontalAlignment="Left" Margin="624,125,0,0" VerticalAlignment="Top" Width="42" Height="23" FontWeight="Bold" Click="PathSelect_Btn_Click">
+        <Button Command="{Binding PathSelectCommand}" IsEnabled="{Binding PathSelectBtnEnabled}" Content="..." HorizontalAlignment="Left" Margin="624,125,0,0" VerticalAlignment="Top" Width="42" Height="23" FontWeight="Bold">
             <Button.Effect>
                 <DropShadowEffect Color="#FF248031" BlurRadius="10"/>
             </Button.Effect>
@@ -45,7 +56,7 @@
                 </LinearGradientBrush>
             </Label.Background>
         </Label>
-        <Button x:Name="Install_Btn" Content="{DynamicResource m_Install_Btn}" HorizontalAlignment="Left" Margin="470,360,0,0" VerticalAlignment="Top" Width="72" Height="25" FontWeight="Bold" Click="Install_Btn_Click">
+        <Button Command="{Binding InstallCommand}" IsEnabled="{Binding InstallBtnEnabled}" Content="{DynamicResource m_Install_Btn}" HorizontalAlignment="Left" Margin="470,360,0,0" VerticalAlignment="Top" Width="72" Height="25" FontWeight="Bold">
             <Button.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="Black" Offset="0"/>
@@ -58,7 +69,7 @@
             <ListBoxItem Content="Russian"/>
         </ComboBox>
         <Label Content="{DynamicResource m_Language_CB}" HorizontalAlignment="Left" Margin="21,184,0,0" VerticalAlignment="Top" FontWeight="Bold" Foreground="White"/>
-        <Button x:Name="Cancel_Btn" Content="{DynamicResource m_Cancel_Btn}" HorizontalAlignment="Left" Margin="547,360,0,0" VerticalAlignment="Top" Width="60" Height="25" FontWeight="Bold" Click="Cancel_Btn_Click">
+        <Button Command="{Binding CancelCommand}" IsEnabled="{Binding CancelBtnEnabled}" Content="{DynamicResource m_Cancel_Btn}" HorizontalAlignment="Left" Margin="547,360,0,0" VerticalAlignment="Top" Width="60" Height="25" FontWeight="Bold">
             <Button.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="Black" Offset="0"/>
@@ -66,7 +77,7 @@
                 </LinearGradientBrush>
             </Button.Background>
         </Button>
-        <Button x:Name="Exit_Btn" Content="{DynamicResource m_Exit_Btn}" HorizontalAlignment="Left" Margin="612,360,0,0" VerticalAlignment="Top" Width="60" Height="25" FontWeight="Bold" Click="Exit_Btn_Click">
+        <Button Command="{Binding ExitCommand}" Content="{DynamicResource m_Exit_Btn}" HorizontalAlignment="Left" Margin="612,360,0,0" VerticalAlignment="Top" Width="60" Height="25" FontWeight="Bold">
             <Button.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="Black" Offset="0"/>
@@ -74,7 +85,6 @@
                 </LinearGradientBrush>
             </Button.Background>
         </Button>
-        
-
     </Grid>
+
 </Window>

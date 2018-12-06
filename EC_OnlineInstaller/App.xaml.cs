@@ -11,10 +11,10 @@ namespace EC_OnlineInstaller
     /// Логика взаимодействия для App.xaml
     /// </summary>
     public partial class App : Application
-    {      
+    {        
         //Евент для оповещения всех окон приложения
         //public static event EventHandler LanguageChanged;
-        public static List<CultureInfo> Languages { get; }
+        public static List<CultureInfo> Languages { get; private set; }
         public static CultureInfo Language
         {
             get
@@ -23,8 +23,10 @@ namespace EC_OnlineInstaller
             }
             set
             {
-                if (value == null) throw new ArgumentNullException("value");
-                if (value == System.Threading.Thread.CurrentThread.CurrentUICulture) return;
+                if (value == null)
+                    throw new ArgumentNullException("value");
+                if (value == System.Threading.Thread.CurrentThread.CurrentUICulture)
+                    return;
 
                 //1. Меняем язык приложения:
                 System.Threading.Thread.CurrentThread.CurrentUICulture = value;
@@ -60,8 +62,10 @@ namespace EC_OnlineInstaller
                 //LanguageChanged(Application.Current, new EventArgs());
             }
         }
+
         public App()
         {
+            Languages = new List<CultureInfo>();
             Languages.Clear();
             Languages.Add(new CultureInfo("en-US")); //Нейтральная культура для этого проекта
             Languages.Add(new CultureInfo("ru-RU"));
