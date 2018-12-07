@@ -24,27 +24,34 @@ namespace EC_OnlineInstaller.Models
         private CancellationToken cancellationToken;
 
 
-        public CancellationTokenSource CancellationTokenSource { get => cancellationTokenSource; set { SetProperty(ref cancellationTokenSource, value); } }       
+        public CancellationTokenSource CancellationTokenSource
+        {
+            get => cancellationTokenSource;
+            set
+            {
+                SetProperty(ref cancellationTokenSource, value);
+                cancellationToken = cancellationTokenSource.Token;
+            }
+        }        
         public ProgressData ProgressData { get; }
 
 
-        public DownloaderClient(string dropboxToken, string dropboxRootFolder, string installationPath, CancellationTokenSource cancellationTokenSource)
+        public DownloaderClient(string dropboxToken, string dropboxRootFolder, CancellationTokenSource cancellationTokenSource)
         {
-            this.dropboxToken = dropboxToken;
-            this.installationPath = installationPath;
+            this.dropboxToken = dropboxToken;    
             this.dropboxRootFolder = dropboxRootFolder;           
             this.dropboxClient = new DropboxClient(dropboxToken);
             this.remoteModVersion = new Version();
-            ProgressData = new ProgressData();
-            CancellationTokenSource = cancellationTokenSource;
-            cancellationToken = cancellationTokenSource.Token;
+            ProgressData = new ProgressData();            
+            CancellationTokenSource = cancellationTokenSource;            
         }
 
 
-        public async Task DownloadFilesAsync()
+        public async Task DownloadFilesAsync(string installationPath)
         {
             await Task.Run(async () =>
             {
+                this.installationPath = installationPath;
                 ProgressData.StatusText = "Starting download...";
                 var downloadList = new List<string>(); //список файлов для загрузки
                 var response = await dropboxClient.Files.ListFolderAsync(dropboxRootFolder, true);
@@ -52,6 +59,7 @@ namespace EC_OnlineInstaller.Models
 
                 while (true)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     foreach (var metadata in response.Entries)
                     {
                         if (metadata.IsFile && //Не скачать файлы гита и файлы конфига
@@ -66,17 +74,18 @@ namespace EC_OnlineInstaller.Models
 
                     if (!response.HasMore)                   
                         break;
-                    
+                   
                     response = await dropboxClient.Files.ListFolderContinueAsync(response.Cursor);
-                }                    
+                }
 
+                this.remoteModVersion = await GetRemoteModVersionAsync();              
 
                 foreach (var file in downloadList)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     await DownloadFromDropboxAsync(file);
                     ProgressData.DownloadedFiles++;                   
-                    ProgressData.StatusText = "Downloading: " + Path.GetFileName(file);                   
+                    ProgressData.StatusText = "Latest version: " + remoteModVersion + "\tDownloading: " + Path.GetFileName(file);                   
                 }
 
                 //Копировать файл .mod из папке мода на папку My Documents\Paradox Interactive\Hearts of Iron IV\mod\
@@ -88,7 +97,8 @@ namespace EC_OnlineInstaller.Models
         }
 
         public async Task<Version> GetRemoteModVersionAsync()
-        {             
+        {
+            var remoteModVersion = new Version();
             await Task.Run(async () =>
             {
                 using (var response = await dropboxClient.Files.DownloadAsync(dropboxRootFolder + "/launcher/Version.xml"))

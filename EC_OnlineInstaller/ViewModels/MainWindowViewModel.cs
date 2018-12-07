@@ -24,12 +24,22 @@ namespace EC_OnlineInstaller.ViewModels
         private bool pathSelectBtnEnabled;
         private bool cancelBtnEnabled;
 
+
         public string InstallationPath { get => installationPath; set { SetProperty(ref installationPath, value); } }
         public bool InstallBtnEnabled { get => installBtnEnabled; set { SetProperty(ref installBtnEnabled, value); } }
         public bool PathSelectBtnEnabled { get => pathSelectBtnEnabled; set { SetProperty(ref pathSelectBtnEnabled, value); } }
         public bool CancelBtnEnabled { get => cancelBtnEnabled; set { SetProperty(ref cancelBtnEnabled, value); } }
         public ProgressData ProgressData { get => downloaderClient.ProgressData; }
-        public CancellationTokenSource CancellationTokenSource { get => cancellationTokenSource; set { SetProperty(ref cancellationTokenSource, value); } }
+        public CancellationTokenSource CancellationTokenSource
+        {
+            get => cancellationTokenSource;
+            set
+            {
+                SetProperty(ref cancellationTokenSource, value);
+                if (downloaderClient != null)
+                    downloaderClient.CancellationTokenSource = value;
+            }
+        }
         public DelegateCommand InstallCommand { get; }
         public DelegateCommand CancelCommand { get; }
         public DelegateCommand ExitCommand { get; }
@@ -44,7 +54,7 @@ namespace EC_OnlineInstaller.ViewModels
             if (!Directory.Exists(InstallationPath))            
                 Directory.CreateDirectory(InstallationPath);
             
-            downloaderClient = new DownloaderClient(dropboxToken, dropboxRootFolderName, InstallationPath, CancellationTokenSource);
+            downloaderClient = new DownloaderClient(dropboxToken, dropboxRootFolderName, CancellationTokenSource);
             PathSelectBtnEnabled = true;
             InstallBtnEnabled = true;
             CancelBtnEnabled = true;
@@ -54,7 +64,7 @@ namespace EC_OnlineInstaller.ViewModels
             {
                 using (var dialog = new FolderBrowserDialog())
                 {
-                    //dialog.Description = this.FindResource("m_SetModDirDesc").ToString();
+                    dialog.Description = "Please set the correct path of mod folder";
                     dialog.SelectedPath = InstallationPath;
                     dialog.ShowDialog();
                     InstallationPath = dialog.SelectedPath;                   
@@ -71,17 +81,23 @@ namespace EC_OnlineInstaller.ViewModels
                 InstallBtnEnabled = false;
 
                 try
-                {
-                    await downloaderClient.DownloadFilesAsync();
+                {                                       
+                    await downloaderClient.DownloadFilesAsync(InstallationPath);
                     downloaderClient.CreateShortcutAfterDownloading();
                 }
                 catch(OperationCanceledException)
                 {
-                    ProgressData.StatusText = "Downloading has canceled";
+                    ProgressData.StatusText = "Downloading has canceled";                 
                 }
                 catch(Exception)
                 {
-                    System.Windows.MessageBox.Show("Network Error", "ERROR".ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Network connection error", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    CancelBtnEnabled = false;
+                    PathSelectBtnEnabled = true;
+                    InstallBtnEnabled = true;
                 }
             });
 
@@ -89,7 +105,9 @@ namespace EC_OnlineInstaller.ViewModels
             {
                 if(CancellationTokenSource != null)                
                     CancellationTokenSource.Cancel();
-                
+
+                ProgressData.StatusText = "Downloading has canceled";
+                CancelBtnEnabled = false;
                 PathSelectBtnEnabled = true;
                 InstallBtnEnabled = true;
             });
