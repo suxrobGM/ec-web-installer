@@ -23,15 +23,7 @@ namespace EC_OnlineInstaller
         {
             InitializeComponent();         
         }    
-                           
-        private void ComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            if(language_CB.SelectedIndex == 0)           
-                App.Language = App.Languages[0]; //en-US                
-            else         
-                App.Language = App.Languages[1]; //ru-RU      
-        }
-
+                                
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
             Process.Start("https://www.facebook.com/suxrobgm");
