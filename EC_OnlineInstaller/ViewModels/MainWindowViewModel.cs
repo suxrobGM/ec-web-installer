@@ -76,7 +76,7 @@ namespace EC_OnlineInstaller.ViewModels
             downloaderClient = new DownloaderClient(dropboxToken, dropboxRootFolderName, CancellationTokenSource);
             PathSelectBtnEnabled = true;
             InstallBtnEnabled = true;
-            CancelBtnEnabled = true;
+            CancelBtnEnabled = false;
 
             // Commands
             PathSelectCommand = new DelegateCommand(() =>
@@ -109,9 +109,9 @@ namespace EC_OnlineInstaller.ViewModels
                 {
                     ProgressData.StatusText = "Downloading has canceled";                 
                 }
-                catch(Exception)
+                catch(Exception ex)
                 {
-                    System.Windows.MessageBox.Show("Network connection error", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Network connection error " + ex.ToString(), "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 finally
                 {
@@ -136,8 +136,16 @@ namespace EC_OnlineInstaller.ViewModels
             {
                 if (CancellationTokenSource != null)               
                     CancellationTokenSource.Cancel();
-                
-                Environment.Exit(0);
+                try
+                {
+                    if (Directory.Exists("_cache"))
+                        Directory.Delete("_cache", true);
+                }
+                catch (Exception) { }
+                finally
+                {
+                    Environment.Exit(0);
+                }               
             });
         }
     }
