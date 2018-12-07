@@ -6,12 +6,15 @@
         xmlns:prism="http://prismlibrary.com/"
         xmlns:local="clr-namespace:EC_OnlineInstaller.ViewModels"       
         mc:Ignorable="d"
-        Title="Hearts of Iron IV: Economic Crisis Online Installer" 
+        Title="{Binding Title}" 
         Height="430" 
         Width="700" 
         BorderBrush="Black" 
         ResizeMode="CanMinimize" 
-        WindowStyle="SingleBorderWindow">
+        WindowStyle="SingleBorderWindow" 
+        Closing="Window_Closing" 
+        Activated="Window_Activated" 
+        WindowStartupLocation="CenterScreen">
 
     <Window.DataContext>
         <local:MainWindowViewModel/>
@@ -29,7 +32,7 @@
         <ProgressBar Value="{Binding ProgressData.ProgressPercent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="21,293,0,0" VerticalAlignment="Top" Width="645" BorderBrush="Red"/>
         <TextBlock Text="{Binding ProgressData.ProgressPercent, StringFormat={}{0:0}%}" Margin="334,293,0,0" TextWrapping="Wrap" Height="23" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold"/>
         <TextBlock Text="{Binding ProgressData.StatusText}" HorizontalAlignment="Left" Margin="21,272,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" FontStyle="Italic"/>
-        <TextBlock Text="{Binding ProgressData.DownloadedFiles}" HorizontalAlignment="Left" Margin="586,272,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" Width="33"/>
+        <TextBlock Text="{Binding ProgressData.DownloadedFiles}" HorizontalAlignment="Left" Margin="609,272,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White"/>
         <TextBlock Text="{Binding ProgressData.MaxDownloadingFiles, StringFormat={}/{0:0}}" HorizontalAlignment="Left" Margin="620,272,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White"/>
         <TextBlock Text="{Binding InstallationPath}" HorizontalAlignment="Left" Margin="21,125,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Background="#FFD6D6D6" Height="23" Width="603" FontWeight="Bold">
             <TextBlock.Effect>
@@ -48,7 +51,7 @@
                 </ToolTip>
             </Button.ToolTip>
         </Button>
-        <Label Content="{DynamicResource m_ModInstallationPath}" HorizontalAlignment="Left" Margin="21,94,0,0" VerticalAlignment="Top" Foreground="White" FontWeight="Bold" FontSize="16" Width="226">
+        <Label Content="{DynamicResource m_ModInstallationPath}" HorizontalAlignment="Left" Margin="21,92,0,0" VerticalAlignment="Top" Foreground="White" FontWeight="Bold" FontSize="16" Width="226">
             <Label.Background>
                 <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
                     <GradientStop Color="Black"/>
@@ -64,7 +67,7 @@
                 </LinearGradientBrush>
             </Button.Background>
         </Button>
-        <ComboBox x:Name="language_CB" HorizontalAlignment="Left" Margin="21,210,0,0" VerticalAlignment="Top" Width="134" SelectedIndex="0" SelectionChanged="ComboBox_SelectionChanged">
+        <ComboBox x:Name="language_CB" SelectedItem="{Binding SelectedItemCB}" HorizontalAlignment="Left" Margin="21,210,0,0" VerticalAlignment="Top" Width="134" SelectedIndex="0">
             <ListBoxItem Content="English"/>
             <ListBoxItem Content="Russian"/>
         </ComboBox>

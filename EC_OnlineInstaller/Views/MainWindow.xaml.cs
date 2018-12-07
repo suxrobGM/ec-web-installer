@@ -36,5 +36,25 @@ namespace EC_OnlineInstaller
         {
             Process.Start("https://www.facebook.com/suxrobgm");
         }
+
+        private void Window_Activated(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!Directory.Exists("_cache"))
+                    Directory.CreateDirectory("_cache");
+            }
+            catch (Exception) { }           
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            try
+            {
+                if (Directory.Exists("_cache"))
+                    Directory.Delete("_cache", true);
+            }
+            catch (Exception) { }             
+        }  
     }
 }

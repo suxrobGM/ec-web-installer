@@ -1,14 +1,15 @@
-﻿using Dropbox.Api;
-using IWshRuntimeLibrary;
-using Prism.Mvvm;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Dropbox.Api;
+using IWshRuntimeLibrary;
+using Prism.Mvvm;
 
 namespace EC_OnlineInstaller.Models
 {
@@ -83,12 +84,80 @@ namespace EC_OnlineInstaller.Models
                 foreach (var file in downloadList)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
+                    ProgressData.StatusText = "Latest version: " + remoteModVersion + "\tDownloading: " + Path.GetFileName(file);
                     await DownloadFromDropboxAsync(file);
-                    ProgressData.DownloadedFiles++;                   
-                    ProgressData.StatusText = "Latest version: " + remoteModVersion + "\tDownloading: " + Path.GetFileName(file);                   
+                    ProgressData.DownloadedFiles++;                                                     
                 }
 
                 //Копировать файл .mod из папке мода на папку My Documents\Paradox Interactive\Hearts of Iron IV\mod\
+                System.IO.File.Copy(installationPath + @"\launcher\Economic_Crisis.mod", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Paradox Interactive", "Hearts of Iron IV", "mod") + @"\Economic_Crisis.mod", true);
+                downloadedAllFiles = true;
+                ProgressData.StatusText = "Finished downloading!";
+
+            }, cancellationToken);
+        }
+     
+        public async Task DownloadFilesAsZipAsync(string installationPath)
+        {
+            await Task.Run(async () =>
+            {
+                this.installationPath = installationPath;
+                ProgressData.StatusText = "Starting download...";
+                var downloadList = new List<string>(); //список папки для загрузки
+                var response = await dropboxClient.Files.ListFolderAsync(dropboxRootFolder);
+                ProgressData.StatusText = "Downloading metadata...";
+
+                while (true)
+                {
+                    foreach (var metadata in response.Entries)
+                    {
+                        if(metadata.IsFolder && !metadata.PathDisplay.Contains("git") && !metadata.PathDisplay.Contains("gfx"))
+                        {
+                            downloadList.Add(metadata.Name);                          
+                        }
+                    }
+
+                    if (!response.HasMore)
+                        break;
+
+                    response = await dropboxClient.Files.ListFolderContinueAsync(response.Cursor);
+                }
+
+                // add gfx subfolders to downloading list
+                response = await dropboxClient.Files.ListFolderAsync(dropboxRootFolder + "/gfx");
+                while (true)
+                {
+                    foreach (var metadata in response.Entries)
+                    {
+                        if (metadata.IsFolder && !metadata.PathDisplay.Contains("git"))
+                        {
+                            downloadList.Add(metadata.PathDisplay.Remove(0, metadata.PathDisplay.IndexOf("gfx")));
+                        }
+                    }
+
+                    if (!response.HasMore)
+                        break;
+
+                    response = await dropboxClient.Files.ListFolderContinueAsync(response.Cursor);
+                }
+
+                ProgressData.MaxDownloadingFiles = downloadList.Count;
+                this.remoteModVersion = await GetRemoteModVersionAsync();
+
+                foreach (var folder in downloadList)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    string fileName = folder + ".zip";
+
+                    if (folder.Contains('/'))
+                        fileName = folder.Replace('/', '.') + ".zip";
+
+                    ProgressData.StatusText = $"Latest version: {remoteModVersion} \tDownloading file: {fileName}";
+                    await DownloadFolderAsZipAsync(folder, installationPath);                                 
+                    ProgressData.DownloadedFiles++;                  
+                }
+
+                // После установки копировать .mod файл из папке мода на папку My Documents\Paradox Interactive\Hearts of Iron IV\mod\
                 System.IO.File.Copy(installationPath + @"\launcher\Economic_Crisis.mod", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Paradox Interactive", "Hearts of Iron IV", "mod") + @"\Economic_Crisis.mod", true);
                 downloadedAllFiles = true;
                 ProgressData.StatusText = "Finished downloading!";
@@ -127,6 +196,7 @@ namespace EC_OnlineInstaller.Models
             shortcut.TargetPath = installationPath + @"\launcher\EC_Launcher.exe";
             shortcut.Save();
         }
+        
 
         private async Task DownloadFromDropboxAsync(string file)
         {
@@ -136,7 +206,7 @@ namespace EC_OnlineInstaller.Models
                 {
                     byte[] data = await response.GetContentAsByteArrayAsync();
                     string fileNameWindows = file.Replace("/", "\\");
-
+                    
                     //если не существует такой каталог, тогда создаем новый каталог
                     if (!Directory.Exists(installationPath + Path.GetDirectoryName(fileNameWindows)))
                     {
@@ -146,6 +216,20 @@ namespace EC_OnlineInstaller.Models
                     System.IO.File.WriteAllBytes(installationPath + fileNameWindows, data);
                 }
             }, cancellationToken);         
+        }
+
+        private async Task DownloadFolderAsZipAsync(string folderName, string extractingDirectoryName)
+        {
+            await Task.Run(async () =>
+            {
+                using (var response = await dropboxClient.Files.DownloadZipAsync($"{dropboxRootFolder}/{folderName}"))
+                {
+                    string sourceZipName = $"_cache\\{Path.GetFileName(folderName)}.zip";
+                    byte[] zipBytes = await response.GetContentAsByteArrayAsync();
+                    System.IO.File.WriteAllBytes(sourceZipName, zipBytes);
+                    ZipFile.ExtractToDirectory(sourceZipName, extractingDirectoryName);
+                }
+            }, cancellationToken);        
         }
     }
 }
