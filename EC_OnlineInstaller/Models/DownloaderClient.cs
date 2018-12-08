@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -10,6 +9,7 @@ using System.Xml.Linq;
 using Dropbox.Api;
 using IWshRuntimeLibrary;
 using Prism.Mvvm;
+using System.IO.Compression;
 
 namespace EC_OnlineInstaller.Models
 {
@@ -69,7 +69,7 @@ namespace EC_OnlineInstaller.Models
                             !metadata.Name.Contains("Settings.xml"))
                         {
                             downloadList.Add(metadata.PathDisplay.Remove(0, dropboxRootFolder.Length));
-                            ProgressData.MaxDownloadingFiles = downloadList.Count();
+                            ProgressData.MaxDownloadingFiles = (ulong)downloadList.Count();
                         }
                     }
 
@@ -141,7 +141,8 @@ namespace EC_OnlineInstaller.Models
                     response = await dropboxClient.Files.ListFolderContinueAsync(response.Cursor);
                 }
 
-                ProgressData.MaxDownloadingFiles = downloadList.Count;
+                ProgressData.MaxDownloadingFiles = (ulong)downloadList.Count;
+                ProgressData.ProgressIndeterminate = true;
                 this.remoteModVersion = await GetRemoteModVersionAsync();
 
                 foreach (var folder in downloadList)
@@ -161,6 +162,7 @@ namespace EC_OnlineInstaller.Models
                 System.IO.File.Copy(installationPath + @"\launcher\Economic_Crisis.mod", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Paradox Interactive", "Hearts of Iron IV", "mod") + @"\Economic_Crisis.mod", true);
                 downloadedAllFiles = true;
                 ProgressData.StatusText = "Finished downloading!";
+                ProgressData.ProgressIndeterminate = false;
 
             }, cancellationToken);
         }
@@ -224,12 +226,36 @@ namespace EC_OnlineInstaller.Models
             {
                 using (var response = await dropboxClient.Files.DownloadZipAsync($"{dropboxRootFolder}/{folderName}"))
                 {
-                    string sourceZipName = $"_cache\\{Path.GetFileName(folderName)}.zip";
-                    byte[] zipBytes = await response.GetContentAsByteArrayAsync();
-                    System.IO.File.WriteAllBytes(sourceZipName, zipBytes);
-                    ZipFile.ExtractToDirectory(sourceZipName, extractingDirectoryName);
+                    string sourceZipName = $"_cache\\{Path.GetFileName(folderName)}.zip";                   
+                    const int bufferSize = 1024 * 1024; // 1 MB
+                    byte[] buffer = new byte[bufferSize];
+
+                    using (var stream = await response.GetContentAsStreamAsync())
+                    {                       
+                        using (var file = new FileStream(sourceZipName, FileMode.OpenOrCreate))
+                        {
+                            var length = await stream.ReadAsync(buffer, 0, bufferSize);
+                            
+                            while (length > 0)
+                            {
+                                file.Write(buffer, 0, length);
+                                ProgressData.DownloadingSize = (ulong)file.Length / 1024;                                                          
+                                length = await stream.ReadAsync(buffer, 0, bufferSize);                               
+                            }
+
+                            var zipArchive = new ZipArchive(file, ZipArchiveMode.Read, true);
+                            try
+                            {
+                                zipArchive.ExtractToDirectory(extractingDirectoryName);
+                            }
+                            catch(Exception)
+                            {
+                                throw new ExistedModFilesException("Existed mod files in the installation path, please change the installation path or remove old mod files");
+                            }
+                        }                                                                 
+                    }                    
                 }
             }, cancellationToken);        
-        }
-    }
+        }        
+    }   
 }

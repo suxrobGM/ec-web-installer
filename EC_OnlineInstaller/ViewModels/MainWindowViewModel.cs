@@ -101,23 +101,31 @@ namespace EC_OnlineInstaller.ViewModels
 
                 try
                 {
-                    //await downloaderClient.DownloadFilesAsync(InstallationPath);
-                    //downloaderClient.CreateShortcutAfterDownloading();
+                    //await downloaderClient.DownloadFilesAsync(InstallationPath);       
                     await downloaderClient.DownloadFilesAsZipAsync(InstallationPath);
+                    downloaderClient.CreateShortcutAfterDownloading();
                 }
                 catch(OperationCanceledException)
                 {
-                    ProgressData.StatusText = "Downloading has canceled";                 
+                    ProgressData.StatusText = "Downloading has canceled";
+                    ProgressData.DownloadedFiles = 0;
+                    ProgressData.MaxDownloadingFiles = 0;         
+                }
+                catch(ExistedModFilesException ex)
+                {
+                    System.Windows.MessageBox.Show(ex.Message, "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 catch(Exception ex)
                 {
-                    System.Windows.MessageBox.Show("Network connection error " + ex.ToString(), "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Network connection error \n" + ex.Message, "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 finally
                 {
                     CancelBtnEnabled = false;
                     PathSelectBtnEnabled = true;
                     InstallBtnEnabled = true;
+                    ProgressData.ProgressIndeterminate = false;
+                    ProgressData.DownloadingSize = 0;
                 }
             });
 
