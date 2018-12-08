@@ -154,7 +154,12 @@ namespace EC_OnlineInstaller.Models
                         fileName = folder.Replace('/', '.') + ".zip";
 
                     ProgressData.StatusText = $"Latest version: {remoteModVersion} \tDownloading file: {fileName}";
-                    await DownloadFolderAsZipAsync(folder, installationPath);                                 
+
+                    if (fileName.Contains("gfx"))
+                        await DownloadFolderAsZipAsync(folder, installationPath + "\\gfx");
+                    else
+                        await DownloadFolderAsZipAsync(folder, installationPath);
+                    
                     ProgressData.DownloadedFiles++;                  
                 }
 
@@ -238,6 +243,7 @@ namespace EC_OnlineInstaller.Models
                             
                             while (length > 0)
                             {
+                                cancellationToken.ThrowIfCancellationRequested();
                                 file.Write(buffer, 0, length);
                                 ProgressData.DownloadingSize = (ulong)file.Length / 1024;                                                          
                                 length = await stream.ReadAsync(buffer, 0, bufferSize);                               
@@ -246,6 +252,9 @@ namespace EC_OnlineInstaller.Models
                             var zipArchive = new ZipArchive(file, ZipArchiveMode.Read, true);
                             try
                             {
+                                if (!Directory.Exists(extractingDirectoryName))
+                                    Directory.CreateDirectory(extractingDirectoryName);
+
                                 zipArchive.ExtractToDirectory(extractingDirectoryName);
                             }
                             catch(Exception)

@@ -121,11 +121,7 @@ namespace EC_OnlineInstaller.ViewModels
                 }
                 finally
                 {
-                    CancelBtnEnabled = false;
-                    PathSelectBtnEnabled = true;
-                    InstallBtnEnabled = true;
-                    ProgressData.ProgressIndeterminate = false;
-                    ProgressData.DownloadingSize = 0;
+                    ResetFlags();
                 }
             });
 
@@ -135,9 +131,7 @@ namespace EC_OnlineInstaller.ViewModels
                     CancellationTokenSource.Cancel();
 
                 ProgressData.StatusText = "Downloading has canceled";
-                CancelBtnEnabled = false;
-                PathSelectBtnEnabled = true;
-                InstallBtnEnabled = true;
+                ResetFlags();
             });
 
             ExitCommand = new DelegateCommand(() =>
@@ -155,6 +149,15 @@ namespace EC_OnlineInstaller.ViewModels
                     Environment.Exit(0);
                 }               
             });
+        }
+
+        private void ResetFlags()
+        {
+            CancelBtnEnabled = false;
+            PathSelectBtnEnabled = true;
+            InstallBtnEnabled = true;
+            ProgressData.ProgressIndeterminate = false;
+            ProgressData.DownloadingSize = 0;
         }
     }
 }
