@@ -247,21 +247,20 @@ namespace EC_OnlineInstaller.Models
                                 file.Write(buffer, 0, length);
                                 ProgressData.DownloadingSize = (ulong)file.Length / 1024;                                                          
                                 length = await stream.ReadAsync(buffer, 0, bufferSize);                               
-                            }
+                            }                                                      
+                        }
 
-                            var zipArchive = new ZipArchive(file, ZipArchiveMode.Read, true);
-                            try
-                            {
-                                if (!Directory.Exists(extractingDirectoryName))
-                                    Directory.CreateDirectory(extractingDirectoryName);
+                        try
+                        {
+                            if (!Directory.Exists(extractingDirectoryName))
+                                Directory.CreateDirectory(extractingDirectoryName);
 
-                                zipArchive.ExtractToDirectory(extractingDirectoryName);
-                            }
-                            catch(Exception)
-                            {
-                                throw new ExistedModFilesException("Existed mod files in the installation path, please change the installation path or remove old mod files");
-                            }
-                        }                                                                 
+                            ZipFile.ExtractToDirectory(sourceZipName, extractingDirectoryName);
+                        }
+                        catch (Exception)
+                        {
+                            throw new ExistedModFilesException("Existed Economic Crisis mod files in the installation path, please change the installation path or remove old Economic Crisis mod files");
+                        }
                     }                    
                 }
             }, cancellationToken);        

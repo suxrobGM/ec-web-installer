@@ -9,11 +9,13 @@ namespace EC_OnlineInstaller.Models
 {
     public class ProgressData : BindableBase
     {
-        private int downloadedFiles;
-        private int maxDownloadingFiles;
+        private ulong downloadedFiles;
+        private ulong maxDownloadingFiles;
+        private ulong downloadingSize;
+        private bool progressIndeterminate;
         private string statusText;
 
-        public int DownloadedFiles
+        public ulong DownloadedFiles
         {
             get => downloadedFiles;
             set
@@ -22,7 +24,7 @@ namespace EC_OnlineInstaller.Models
                 RaisePropertyChanged("ProgressPercent");
             }
         }
-        public int MaxDownloadingFiles
+        public ulong MaxDownloadingFiles
         {
             get => maxDownloadingFiles;
             set
@@ -31,13 +33,29 @@ namespace EC_OnlineInstaller.Models
                 RaisePropertyChanged("ProgressPercent");
             }
         }
-        public int ProgressPercent
+        public ulong ProgressPercent
         {
             get
             {
                 if(MaxDownloadingFiles > 0)
                     return (DownloadedFiles * 100) / MaxDownloadingFiles;
                 return 0;
+            }
+        }
+        public ulong DownloadingSize
+        {
+            get => downloadingSize;
+            set
+            {
+                SetProperty(ref downloadingSize, value);
+            }
+        }
+        public bool ProgressIndeterminate
+        {
+            get => progressIndeterminate;
+            set
+            {
+                SetProperty(ref progressIndeterminate, value);
             }
         }
         public string StatusText

@@ -117,7 +117,7 @@ namespace EC_OnlineInstaller.ViewModels
                 }
                 catch(Exception ex)
                 {
-                    System.Windows.MessageBox.Show("Network connection error \n" + ex.Message, "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show($"Network connection error \n{ex.Message}" , "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 finally
                 {
