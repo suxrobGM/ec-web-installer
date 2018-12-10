@@ -89,8 +89,8 @@ namespace EC_OnlineInstaller.Models
                     ProgressData.DownloadedFiles++;                                                     
                 }
 
-                //Копировать файл .mod из папке мода на папку My Documents\Paradox Interactive\Hearts of Iron IV\mod\
-                System.IO.File.Copy(installationPath + @"\launcher\Economic_Crisis.mod", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Paradox Interactive", "Hearts of Iron IV", "mod") + @"\Economic_Crisis.mod", true);
+                // Копировать файл .mod из папке мода на папку My Documents\Paradox Interactive\Hearts of Iron IV\mod\
+                System.IO.File.Copy(installationPath + @"\launcher\Economic_Crisis.mod", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Paradox Interactive", "Hearts of Iron IV", "mod") + "\\Economic_Crisis.mod", true);
                 downloadedAllFiles = true;
                 ProgressData.StatusText = "Finished downloading!";
 
@@ -164,9 +164,9 @@ namespace EC_OnlineInstaller.Models
                 }
 
                 // После установки копировать .mod файл из папке мода на папку My Documents\Paradox Interactive\Hearts of Iron IV\mod\
-                System.IO.File.Copy(installationPath + @"\launcher\Economic_Crisis.mod", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Paradox Interactive", "Hearts of Iron IV", "mod") + @"\Economic_Crisis.mod", true);
-                downloadedAllFiles = true;
+                System.IO.File.Copy(installationPath + @"\launcher\Economic_Crisis.mod", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Paradox Interactive", "Hearts of Iron IV", "mod") + "\\Economic_Crisis.mod", true);               
                 ProgressData.StatusText = "Finished downloading!";
+                downloadedAllFiles = true;
                 ProgressData.ProgressIndeterminate = false;
 
             }, cancellationToken);
@@ -213,12 +213,9 @@ namespace EC_OnlineInstaller.Models
                 {
                     byte[] data = await response.GetContentAsByteArrayAsync();
                     string fileNameWindows = file.Replace("/", "\\");
-                    
-                    //если не существует такой каталог, тогда создаем новый каталог
-                    if (!Directory.Exists(installationPath + Path.GetDirectoryName(fileNameWindows)))
-                    {
-                        Directory.CreateDirectory(installationPath + Path.GetDirectoryName(fileNameWindows));
-                    }
+                                      
+                    if (!Directory.Exists(installationPath + Path.GetDirectoryName(fileNameWindows)))                   
+                        Directory.CreateDirectory(installationPath + Path.GetDirectoryName(fileNameWindows));                    
 
                     System.IO.File.WriteAllBytes(installationPath + fileNameWindows, data);
                 }
@@ -259,11 +256,13 @@ namespace EC_OnlineInstaller.Models
                         }
                         catch (Exception)
                         {
-                            throw new ExistedModFilesException("Existed Economic Crisis mod files in the installation path, please change the installation path or remove old Economic Crisis mod files");
+                            ProgressData.StatusText = "Downloading has canceled";
+                            ProgressData.ProgressIndeterminate = false;
+                            throw new ExistedModFilesException("Existed Economic Crisis mod files in the installation path, please change the installation path or remove old Economic Crisis mod files", extractingDirectoryName);
                         }
                     }                    
                 }
             }, cancellationToken);        
-        }        
+        }           
     }   
 }

@@ -28,7 +28,19 @@ namespace EC_OnlineInstaller.ViewModels
         private bool cancelBtnEnabled;
 
 
-        public string InstallationPath { get => installationPath; set { SetProperty(ref installationPath, value); } }
+        public string InstallationPath
+        {
+            get => installationPath;
+            set
+            {
+                if (!value.EndsWith("\\Economic_Crisis"))
+                    value += "\\Economic_Crisis";
+
+                SetProperty(ref installationPath, value);
+                if (!Directory.Exists(installationPath))
+                    Directory.CreateDirectory(installationPath);
+            }
+        }
         public string Title { get => title; set { SetProperty(ref title, value); } }
         public string SelectedItemCB
         {
@@ -67,11 +79,7 @@ namespace EC_OnlineInstaller.ViewModels
         {
             InstallationPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Paradox Interactive", "Hearts of Iron IV", "mod", "Economic_Crisis");
             CancellationTokenSource = new CancellationTokenSource();
-            Title = $"Hearts of Iron IV: Economic Crisis Online Installer v{Assembly.GetExecutingAssembly().GetName().Version}";
-
-
-            if (!Directory.Exists(InstallationPath))            
-                Directory.CreateDirectory(InstallationPath);
+            Title = $"Hearts of Iron IV: Economic Crisis Online Installer v{Assembly.GetExecutingAssembly().GetName().Version}";           
             
             downloaderClient = new DownloaderClient(dropboxToken, dropboxRootFolderName, CancellationTokenSource);
             PathSelectBtnEnabled = true;
@@ -100,8 +108,7 @@ namespace EC_OnlineInstaller.ViewModels
                 InstallBtnEnabled = false;
 
                 try
-                {
-                    //await downloaderClient.DownloadFilesAsync(InstallationPath);       
+                {                     
                     await downloaderClient.DownloadFilesAsZipAsync(InstallationPath);
                     downloaderClient.CreateShortcutAfterDownloading();
                 }
@@ -113,7 +120,15 @@ namespace EC_OnlineInstaller.ViewModels
                 }
                 catch(ExistedModFilesException ex)
                 {
-                    System.Windows.MessageBox.Show(ex.Message, "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                    var result = System.Windows.MessageBox.Show(ex.Message + "\nDo you want to delete old Economic Crisis files?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if(result == MessageBoxResult.Yes)
+                    {
+                        if (Directory.Exists(ex.ExistedModPath))
+                            Directory.Delete(ex.ExistedModPath, true);
+
+                        await downloaderClient.DownloadFilesAsZipAsync(InstallationPath);
+                        downloaderClient.CreateShortcutAfterDownloading();
+                    }
                 }
                 catch(Exception ex)
                 {
